@@ -41,14 +41,6 @@ uint32_t get_lookahead(void)
 
 int mount_init(lfs_t little_fs, struct lfs_config little_fs_config)
 {
-   // Create directory if it doesn't exist
-   int err = mkdir("rwtest", 0777);
-   if (err && errno != EEXIST) {
-      err = -errno;
-      printf("lfs_emubd_create mkdir -> %d", err);
-      return err;
-   }
-
    int mount_ret = lfs_mount(&little_fs, &little_fs_config);   //挂载littlefs
    if (mount_ret != LFS_ERR_OK)   //挂载失败
    {
