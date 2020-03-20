@@ -19,8 +19,8 @@ static struct lfs_config little_fs_config = {
    .read_size = LITTLE_FS_READ_SIZE,   //读
    .prog_size = LITTLE_FS_PROGRAM_SIZE,   //写
    .block_size = LITTLE_FS_BLOCK_SIZE, //块大小
-   .block_count = 64,
-   .lookahead = 64,
+   .block_count = 3,
+   .lookahead = 128,
    
    .read_buffer = read_buffer,
    .prog_buffer = program_buffer,
@@ -76,24 +76,35 @@ int mount_init(lfs_t little_fs, struct lfs_config little_fs_config)
 
 int main(int argc, char const *argv[])
 {
-   char str[] = "hello world";
+   char str[256] = "hello world";   //最小操作读写快为#define LITTLE_FS_READ_SIZE (128) #define LITTLE_FS_PROGRAM_SIZE (128)
 
    char *rp = NULL;
 
-   rp = calloc(0, sizeof(str)+1);
+   rp = calloc(0, LITTLE_FS_BLOCK_SIZE+1);
 
    //little_fs_config.context = calloc(0, 4096 * 64);
    //cfg_t* p = little_fs_config.context;
 
+   //system("touch rwtest.txt");
 
-   little_fs_config.block_count = get_block_count();     //3484
+   //littlfs_program(&little_fs_config, 0, 0, str, sizeof(str));
+
+   //littlfs_read(&little_fs_config, 0, 0, rp, sizeof(str));
+
+   //littlfs_erase(&little_fs_config, 0);
+
+   
+
+   /*little_fs_config.block_count = get_block_count();     //3484
    little_fs_config.lookahead = get_lookahead(); //3488
    int ret = mount_init(little_fs, little_fs_config);
    if (ret != LFS_ERR_OK)
    {
       printf("main lfs_mount error=%d", ret);
       return 0;
-   }
+   }*/
+
+   
 
    /*int lfs_file_open(lfs_t *lfs, lfs_file_t *file,
       const char *path, int flags) {
@@ -101,12 +112,14 @@ int main(int argc, char const *argv[])
    /*int lfs_file_opencfg(lfs_t *lfs, lfs_file_t *file,
       const char *path, int flags,
       const struct lfs_file_config *cfg)*/
-   lfs_file_open(&little_fs, &file, "rwtest.txt", LFS_O_RDWR | LFS_O_CREAT); //可读可写 不存在则创建   //+错误判断
+   
+   //lfs_file_open(&little_fs, &file, "rwtest.txt", LFS_O_RDWR | LFS_O_CREAT); //可读可写 不存在则创建   //+错误判断
 
    //写文件数据
    /*lfs_ssize_t lfs_file_write(lfs_t *lfs, lfs_file_t *file,
       const void *buffer, lfs_size_t size);*/
-   lfs_file_write(&little_fs, &file, str, sizeof(str));
+   
+   //lfs_file_write(&little_fs, &file, str, sizeof(str));
 
    /*
    rp = calloc(0, sizeof(str + 1));
@@ -115,25 +128,26 @@ int main(int argc, char const *argv[])
    }
    */
 
+   //int lfs_file_rewind(lfs_t *lfs, lfs_file_t *file);
+
+   //lfs_file_rewind(&little_fs, &file);
+
    /*lfs_ssize_t lfs_file_read(lfs_t *lfs, lfs_file_t *file,
       void *buffer, lfs_size_t size);*/
       //从"test"文件中读取sizeof(boot_count)数据到boot_count   //+错误判断
-   lfs_file_read(&little_fs, &file, &rp, sizeof(str));
+   
+   //lfs_file_read(&little_fs, &file, &rp, sizeof(str));
 
    printf("read data = %s\n", rp);
 
-   /*将文件的位置更改为文件的开头
-
-   相当于lfs_file_seek（lfs，file，0，LFS_SEEK_CUR）
-   失败时返回负错误代码。*/
-   //int lfs_file_rewind(lfs_t *lfs, lfs_file_t *file);
-   lfs_file_rewind(&little_fs, &file);   //+错误判断
-
    //int lfs_file_close(lfs_t *lfs, lfs_file_t *file);
-   lfs_file_close(&little_fs, &file);
+   
+   //lfs_file_close(&little_fs, &file);
+
 
    //int lfs_unmount(lfs_t *lfs);  //卸载littlefs
-   lfs_unmount(&little_fs);
+   
+   //lfs_unmount(&little_fs);
 
    return 0;
 }
@@ -146,8 +160,8 @@ int main(int argc, char const *argv[])
 int littlfs_read(const struct lfs_config *cfg, lfs_block_t block,
             lfs_off_t off, void *buffer, lfs_size_t size)
 {
-	//printf("littlfs_read(\"%p, %d, %d, %p, %d)\n",
-    //        (void*)cfg, block, off, buffer, size);
+	printf("littlfs_read(\"%p, %d, %d, %p, %d)\n",
+            (void*)cfg, block, off, buffer, size);
 	char *data = buffer;
 
 	assert(off % cfg->read_size == 0);  //void assert( int expression );    它的条件返回错误，则终止程序执行
@@ -189,8 +203,8 @@ int littlfs_read(const struct lfs_config *cfg, lfs_block_t block,
 int littlfs_program(const struct lfs_config *cfg, lfs_block_t block,
             lfs_off_t off, const void *buffer, lfs_size_t size)
 {
-	//printf("littlfs_program(%p, %d, %d, %p, %d)\n",
-    //        (void*)cfg, block, off, buffer, size);
+	printf("littlfs_program(%p, %d, %d, %p, %d)\n",
+            (void*)cfg, block, off, buffer, size);
     //cfg_t* emu = cfg->context;
 	const uint8_t* data = buffer;
 
@@ -199,7 +213,7 @@ int littlfs_program(const struct lfs_config *cfg, lfs_block_t block,
     assert(size % cfg->prog_size == 0);
     assert(block < cfg->block_count);
 
-    FILE *f = fopen("rwtest.txt", "w+b");
+    FILE *f = fopen("rwtest.txt", "r+b");
     if (!f) {
         int err = (errno == EACCES) ? 0 : -errno;
         printf("lfs_emubd_prog fopen -> %d\n", err);
@@ -262,10 +276,10 @@ int littlfs_erase(const struct lfs_config *cfg, lfs_block_t block)
 	// Check if erase is valid
     // assert(block < cfg->block_count);
     //注意：num：对象个数，size：对象占据的内存字节数，相较于malloc函数，calloc函数会自动将内存初始化为0；
-    char* erase = malloc(cfg->block_size);  //void* calloc（unsigned int num，unsigned int size
-    memset(erase, 0xffffffff, cfg->block_size);
+    char* perase = malloc(cfg->block_size + 1);  //void* calloc（unsigned int num，unsigned int size
+    memset(perase, 255, cfg->block_size);
 
-    FILE *f = fopen("rwtest.txt", "w");
+    FILE *f = fopen("rwtest.txt", "r+b");
     if (!f) {
         int err = (errno == EACCES) ? 0 : -errno;
         printf("littlfs_erase fopen -> %d\n", err);
@@ -283,13 +297,15 @@ int littlfs_erase(const struct lfs_config *cfg, lfs_block_t block)
         return err;
     }
 
-    size_t res = fwrite(erase, 1, block * cfg->block_size, f);
-    if (res < 1) {
+    size_t res = fwrite(perase, 1, (block + 1) * cfg->block_size, f);
+    printf("%ld\n", res);
+    if (res < block * cfg->block_size) {
         err = -errno;
         printf("littlfs_erase fwrite -> %d\n", err);
         fclose(f);
         return err;
     }
+
 
     err = fclose(f);
     if (err) {
@@ -298,7 +314,8 @@ int littlfs_erase(const struct lfs_config *cfg, lfs_block_t block)
         return err;
     }
 
-    free(erase);
+
+    free(perase);
 
     //printf("lfs_emubd_erase end -> %d", 0);
     return 0;
@@ -306,8 +323,9 @@ int littlfs_erase(const struct lfs_config *cfg, lfs_block_t block)
 
 int littlfs_sync(const struct lfs_config *cfg)
 {
+    /*
     //cfg_t* emu = cfg->context;
-	FILE *f = fopen("rwtest.txt", "w");
+	FILE *f = fopen("rwtest.txt", "a+b");
     if (!f) {
         int err = -errno;
         printf("lfs_emubd_sync fopen -> %d\n", err);
@@ -323,6 +341,8 @@ int littlfs_sync(const struct lfs_config *cfg)
         return err;
     }
 
+    
+    */
 
     //printf("lfs_emubd_sync end -> %d", 0);
     return 0;
