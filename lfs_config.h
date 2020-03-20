@@ -1,0 +1,47 @@
+#ifndef __LFS_CONFIG_H__
+#define __LFS_CONFIG_H__
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include "lfs.h"
+
+
+#define LITTLE_FS_MAX_BLOCK_COUNT (3484)
+
+/**
+ * @brief 与flash通讯每次至少读取多少字节
+ *        此值过大，需要大量内存
+ *        此值过小，每次读取都会与flash进行通讯
+ *
+ */
+#define LITTLE_FS_READ_SIZE (32)
+
+/**
+ * @brief 与flash通讯每次至少写入多少字节
+ *        必须是LITTLE_FS_READ_SIZE的倍数
+ *
+ */
+#define LITTLE_FS_PROGRAM_SIZE (32)
+
+/**
+ * @brief flash每次至少擦除多少字节
+ *        必须是LITTLE_FS_PROGRAM_SIZE的倍数
+ *
+ */
+#define LITTLE_FS_BLOCK_SIZE (4096)
+
+int littlfs_read(const struct lfs_config *c, lfs_block_t block,
+            lfs_off_t off, void *buffer, lfs_size_t size);
+
+int littlfs_program(const struct lfs_config *c, lfs_block_t block,
+            lfs_off_t off, const void *buffer, lfs_size_t size);
+
+int littlfs_erase(const struct lfs_config *c, lfs_block_t block);
+
+int littlfs_sync(const struct lfs_config *c);
+
+
+#endif
