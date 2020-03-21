@@ -75,20 +75,32 @@ int main(int argc, char const *argv[])
 
    littlfs_program(&little_fs_config, 0, 0, str, sizeof(str));
 
-   littlfs_read(&little_fs_config, 0, 0, rp, sizeof(str));
+   littlfs_erase(&little_fs_config, 1);
 
-   //littlfs_erase(&little_fs_config, 0);
+   littlfs_read(&little_fs_config, 0, 0, rp, sizeof(str));
+   
+   printf("read data = %s\n", rp);
+
+   memset(rp, 0, sizeof(str));
+
+
+   //int mount_ret = lfs_mount(&little_fs, &little_fs_config);
+
+   lfs_file_read(&little_fs, &file, rp, sizeof(str));
 
    printf("read data = %s\n", rp);
 
    little_fs_config.block_count = get_block_count();     //3484
    little_fs_config.lookahead = get_lookahead(); //3488
-   int ret = mount_init(&little_fs, &little_fs_config);
+
+   //lfs_mount(little_fs, little_fs_config);
+
+   /*int ret = mount_init(&little_fs, &little_fs_config);
    if (ret != LFS_ERR_OK)
    {
       printf("main lfs_mount error=%d", ret);
       return 0;
-   }
+   }*/
    
    //lfs_file_open(&little_fs, &file, "rwtest.txt", LFS_O_RDWR | LFS_O_CREAT); //可读可写 不存在则创建   //+错误判断
    
@@ -97,13 +109,11 @@ int main(int argc, char const *argv[])
 
    //lfs_file_rewind(&little_fs, &file);
    
-   lfs_file_read(&little_fs, &file, &rp, sizeof(str));
+   //lfs_file_read(&little_fs, &file, &rp, sizeof(str));
 
-   printf("read data = %s\n", rp);
+   //printf("read data = %s\n", rp);
    
    //lfs_file_close(&little_fs, &file);
-
-  // //int lfs_unmount(lfs_t *lfs);  //卸载littlefs
    
    //lfs_unmount(&little_fs);
    printf("!!!\n");
