@@ -49,30 +49,38 @@ int main(int argc, char const *argv[])
 
 	char* p = malloc(little_fs_config.block_count * little_fs_config.block_size + 1);
 	little_fs_config.context = malloc(little_fs_config.block_count * little_fs_config.block_size + 1);
+  char* pd = little_fs_config.context;
 
   memset(p, 255, little_fs_config.block_count * little_fs_config.block_size);
-
+  
   littlfs_program(&little_fs_config, 0, 0, str, sizeof(str));
 
-  lfs_file_write(&little_fs, &file, p, sizeof(str));
+  //littlfs_read(&little_fs_config, 0, 0, p, sizeof(str));
 
-  lfs_file_read(&little_fs, &file, &rp, sizeof(str));
+  //printf("rp = %s\n", p);
+  
+  //littlfs_erase(&little_fs_config, 0);
+  //printf("little_fs_config.context = %s\n", pd);
 
-  printf("rp = %s\n", rp);
+  //printf("read data = %s\n", rp);
 
-  memset(rp, 255, sizeof(str));
+  //lfs_file_write(&little_fs, &file, str, sizeof(str));
 
-  littlfs_read(&little_fs_config, 0, 0, rp, sizeof(str));
+  //int mount_ret = lfs_mount(&little_fs, &little_fs_config);   //挂载littlefs
 
-  littlfs_erase(&little_fs_config, 0);
+  printf("little_fs_config.context = %s\n", pd);
 
-  printf("read data = %s\n", rp);
+  lfs_file_rewind(&little_fs, &file);
 
-	//int mount_ret = lfs_mount(&little_fs, &little_fs_config);   //挂载littlefs
+  lfs_file_read(&little_fs, &file, p, sizeof(str));
+
+  printf("read data = %s\n", p);
+
+	
 
 	//lfs_file_open(&little_fs, &file, "tt.txt", LFS_O_RDWR | LFS_O_CREAT); //可读可写 不存在则创建   //+错误判断
 
-  //lfs_file_rewind(&little_fs, &file);
+  
 
   
 
@@ -80,6 +88,7 @@ int main(int argc, char const *argv[])
 
   //lfs_unmount(&little_fs);
 
+  free(p);
 	free(little_fs_config.context);
 
 	return 0;
@@ -128,7 +137,7 @@ int littlfs_erase(const struct lfs_config *cfg, lfs_block_t block)
     //char* perase = malloc(cfg->block_size + 1);  //void* calloc（unsigned int num，unsigned int size
     memset(cfg->context + block * cfg->block_size, 255, cfg->block_size);
 
-    //printf("lfs_emubd_erase end -> %d", 0);
+    printf("lfs_emubd_erase end -> %d\n", 0);
     return 0;
 }
 
