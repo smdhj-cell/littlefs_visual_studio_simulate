@@ -27,21 +27,6 @@ static struct lfs_config little_fs_config = {
    .lookahead_buffer = lookahead_buffer,
 };
 
-
-static inline void lfs_emubd_tole32(cfg_t *emu) {
-   emu->read_size     = lfs_tole32(emu->read_size);
-   emu->prog_size     = lfs_tole32(emu->prog_size);
-   emu->block_size    = lfs_tole32(emu->block_size);
-   emu->block_count   = lfs_tole32(emu->block_count);
-}
-
-static inline void lfs_emubd_fromle32(cfg_t *emu) {
-   emu->read_size     = lfs_fromle32(emu->read_size);
-   emu->prog_size     = lfs_fromle32(emu->prog_size);
-   emu->block_size    = lfs_fromle32(emu->block_size);
-   emu->block_count   = lfs_fromle32(emu->block_count);
-}
-
 uint32_t get_block_count(void)
 {
 	//return LITTLE_FS_READ_SIZE*8;
@@ -54,18 +39,18 @@ uint32_t get_lookahead(void)
    return block_count;
 }
 
-int mount_init(lfs_t little_fs, struct lfs_config little_fs_config)
+int mount_init(lfs_t* little_fs, struct lfs_config* little_fs_config)
 {
-   int mount_ret = lfs_mount(&little_fs, &little_fs_config);   //挂载littlefs
+   int mount_ret = lfs_mount(little_fs, little_fs_config);   //挂载littlefs
    if (mount_ret != LFS_ERR_OK)   //挂载失败
    {
       // sFLASH_NOR_ChipErase();
-      const int format_ret = lfs_format(&little_fs, &little_fs_config); //使用littlefs格式化块设备
+      const int format_ret = lfs_format(little_fs, little_fs_config); //使用littlefs格式化块设备
       if (format_ret != LFS_ERR_OK) //littlefs格式化块设备失败
       {
           printf("lfs_format error=%d", format_ret);
       }
-      mount_ret = lfs_mount(&little_fs, &little_fs_config);
+      mount_ret = lfs_mount(little_fs, little_fs_config);
       if (mount_ret != LFS_ERR_OK)
       {
           printf("lfs_mount 2 error=%d", mount_ret);
@@ -98,7 +83,7 @@ int main(int argc, char const *argv[])
 
    little_fs_config.block_count = get_block_count();     //3484
    little_fs_config.lookahead = get_lookahead(); //3488
-   int ret = mount_init(little_fs, little_fs_config);
+   int ret = mount_init(&little_fs, &little_fs_config);
    if (ret != LFS_ERR_OK)
    {
       printf("main lfs_mount error=%d", ret);
