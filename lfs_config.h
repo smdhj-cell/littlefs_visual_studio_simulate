@@ -18,9 +18,10 @@ typedef struct cfg{
     uint32_t block_count;
 } cfg_t;
 
-#define LITTLE_FS_MAX_LOOKAHEAD (32 * ((LITTLE_FS_MAX_BLOCK_COUNT + 31) / 32))
+#define LITTLE_FS_MAX_LOOKAHEAD (128)
+//#define LITTLE_FS_MAX_LOOKAHEAD (32 * ((LITTLE_FS_MAX_BLOCK_COUNT + 31) / 32))
 
-#define LITTLE_FS_MAX_BLOCK_COUNT (3488)
+//#define LITTLE_FS_MAX_BLOCK_COUNT (3488)
 
 /**
  * @brief 与flash通讯每次至少读取多少字节
@@ -42,7 +43,7 @@ typedef struct cfg{
  *        必须是LITTLE_FS_PROGRAM_SIZE的倍数
  *
  */
-#define LITTLE_FS_BLOCK_SIZE (4096)
+#define LITTLE_FS_BLOCK_SIZE (4096) // 2^12
 
 int littlfs_read(const struct lfs_config *c, lfs_block_t block,
             lfs_off_t off, void *buffer, lfs_size_t size);
