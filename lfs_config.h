@@ -20,7 +20,7 @@ typedef struct cfg{
 
 #define LITTLE_FS_MAX_LOOKAHEAD (32 * ((LITTLE_FS_MAX_BLOCK_COUNT + 31) / 32))
 
-#define LITTLE_FS_MAX_BLOCK_COUNT (3484)
+#define LITTLE_FS_MAX_BLOCK_COUNT (3488)
 
 /**
  * @brief 与flash通讯每次至少读取多少字节
